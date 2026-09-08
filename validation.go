@@ -25,7 +25,7 @@ var (
 )
 
 // Struct validates exported fields using `validate:"..."` tags.
-// Automatically trims leading and trailing whitespace from string fields prior to tag evaluation.
+// Automatically trims whitespace, evaluates tags, and calls Validatable.Validate() if implemented.
 func Struct(ctx context.Context, value any) error {
 	if value == nil {
 		return nil
@@ -41,13 +41,23 @@ func Struct(ctx context.Context, value any) error {
 		return nil
 	}
 
-	// Sanitization pre-pass: Trim whitespace before running rules
+	// 1. Sanitization pre-pass: Trim whitespace
 	TrimStringFields(value)
 
+	// 2. Struct tag validation
 	coreMu.RLock()
 	err := core().StructCtx(ctx, value)
 	coreMu.RUnlock()
-	return err
+	if err != nil {
+		return err
+	}
+
+	// 3. Custom semantic validation interface (runs after tag checks pass)
+	if v, ok := value.(Validatable); ok {
+		return v.Validate()
+	}
+
+	return nil
 }
 
 // RegisterCustom registers context-aware validation rules safely at cold-path init.

@@ -129,4 +129,29 @@ func main() {
 				i+1, detail.Field, detail.Validation, detail.Value)
 		}
 	}
+
+	fmt.Println("=================================================================")
+	fmt.Println("❌ TEST 3: Valid Struct Tags, Fails Custom Semantic Validation")
+	fmt.Println("=================================================================")
+
+	smallOrderReq := &CheckoutReq{
+		CustomerEmail: "bob@nexss.com",
+		Shipping: AddressDTO{
+			Street:  "123 Main Street",
+			City:    "Boston",
+			Country: "US",
+		},
+		Items: []OrderItemDTO{
+			{SKU: "ITEM100", Quantity: 1, PriceUSD: 250}, // $2.50 total (< $5.00 minimum)
+		},
+	}
+
+	_, err = processCheckout.Do(ctx, smallOrderReq)
+	if err != nil {
+		appErr := xerr.From(err)
+		fmt.Printf("AppError Kind: [%s] | Message: %s\n", appErr.Kind, appErr.Message)
+		if appErr.Cause != nil {
+			fmt.Printf("Custom Rule Cause: %v\n", appErr.Cause)
+		}
+	}
 }
