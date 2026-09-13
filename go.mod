@@ -1,10 +1,10 @@
 module github.com/nexssp/validation
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/go-playground/validator/v10 v10.30.4
-	github.com/nexssp/kernel v0.6.0
+	github.com/nexssp/kernel v0.7.2
 )
 
 require (
@@ -12,9 +12,10 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
-	golang.org/x/time v0.15.0 // indirect
+	github.com/stretchr/testify v1.12.1 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/time v0.16.0 // indirect
 )
