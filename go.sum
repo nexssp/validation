@@ -10,8 +10,8 @@ github.com/go-playground/validator/v10 v10.30.4 h1:9Rcod2ZPO6mOEG6b4GqyoHE/H6//Z
 github.com/go-playground/validator/v10 v10.30.4/go.mod h1:numpT+RPLE91R9oYWMY/R9zRgJBewr3IXHko4OISPpk=
 github.com/leodido/go-urn v1.5.0 h1:pLqT2kq1zpHW/1D18QMjMpdtX7cekxqtJJjg5ANyWw0=
 github.com/leodido/go-urn v1.5.0/go.mod h1:9BORnCDhdPBJNDEX+w1bJisa8yOKYi116VeO96s4ifE=
-github.com/nexssp/kernel v0.7.2 h1:ZsGxcV25r1wF8kgBf3lzePGgWHm95BvLZKVOQPSYsr0=
-github.com/nexssp/kernel v0.7.2/go.mod h1:4+7o1mgE9Ie6BhyG/SbrwFhPkQ0zpJxLQbtHrDVgqAE=
+github.com/nexssp/kernel v0.10.0 h1:WfwK0BtpysM1gntDT6/iFjlVdQzApiW9xBmvQ/Kset8=
+github.com/nexssp/kernel v0.10.0/go.mod h1:gLyh+67KWqJsj0YTMijJyfjh7NGN58pqjRmEdFd1VO0=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
