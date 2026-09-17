@@ -14,7 +14,7 @@ var (
 	core   = sync.OnceValue(func() *validator.Validate {
 		v := validator.New(validator.WithRequiredStructEnabled())
 		v.RegisterTagNameFunc(func(field reflect.StructField) string {
-			name := strings.SplitN(field.Tag.Get("json"), ",", 2)[0]
+			name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
 			if name == "-" {
 				return ""
 			}
@@ -94,7 +94,8 @@ func trimValue(rv reflect.Value) {
 			trimValue(rv.Elem())
 		}
 	case reflect.Struct:
-		for i := 0; i < rv.NumField(); i++ {
+		//nolint:modernize // reflect.Value has no Fields() iterator; only Type.Fields() exists
+		for i := range rv.NumField() {
 			field := rv.Field(i)
 			if field.Kind() == reflect.String {
 				if field.CanSet() {
@@ -108,5 +109,19 @@ func trimValue(rv reflect.Value) {
 		for j := 0; j < rv.Len(); j++ {
 			trimValue(rv.Index(j))
 		}
+	case reflect.Invalid, reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64,
+		reflect.Complex64, reflect.Complex128,
+		reflect.Chan, reflect.Func, reflect.Map, reflect.String,
+		reflect.UnsafePointer:
+		// No trimmable string descendants.
 	}
+}
+
+// Validatable allows structs to execute custom semantic validation logic
+// after tag validation passes. Implementations must be safe for concurrent use.
+type Validatable interface {
+	Validate() error
 }
