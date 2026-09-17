@@ -61,10 +61,13 @@ func Struct(ctx context.Context, value any) error {
 }
 
 // RegisterCustom registers context-aware validation rules safely at cold-path init.
+// Panics if the tag is invalid or already registered: both are programmer errors.
 func RegisterCustom(tag string, fn validator.FuncCtx) {
 	coreMu.Lock()
-	_ = core().RegisterValidationCtx(tag, fn)
-	coreMu.Unlock()
+	defer coreMu.Unlock()
+	if err := core().RegisterValidationCtx(tag, fn); err != nil {
+		panic("validation: register custom tag " + tag + ": " + err.Error())
+	}
 }
 
 // RegisterType registers custom type handlers safely at cold-path init.
@@ -106,7 +109,7 @@ func trimValue(rv reflect.Value) {
 			}
 		}
 	case reflect.Slice, reflect.Array:
-		for j := 0; j < rv.Len(); j++ {
+		for j := range rv.Len() {
 			trimValue(rv.Index(j))
 		}
 	case reflect.Invalid, reflect.Bool,

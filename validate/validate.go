@@ -45,14 +45,14 @@ type fieldError struct {
 
 func (e fieldError) Error() string { return e.msg }
 
-func Required(val string, field string) error {
+func Required(val, field string) error {
 	if strings.TrimSpace(val) == "" {
 		return fieldError{field, "required", "field cannot be empty"}
 	}
 	return nil
 }
 
-func Min[T ~int | ~int64 | ~float64](val T, minVal T, field string) error {
+func Min[T ~int | ~int64 | ~float64](val, minVal T, field string) error {
 	if val < minVal {
 		return fieldError{field, "min", fmt.Sprintf("must be >= %v", minVal)}
 	}
