@@ -38,8 +38,7 @@ func AutoValidate[Req, Res any](b *action.Builder[Req, Res]) *action.Builder[Req
 // FromValidatorError maps validator/v10 field errors to Nexss structured details with readable messages.
 func FromValidatorError(err error) *xerr.AppError {
 	appErr := xerr.Validation("validation failed", err)
-	var fieldErrors validator.ValidationErrors
-	if errors.As(err, &fieldErrors) {
+	if fieldErrors, ok := errors.AsType[validator.ValidationErrors](err); ok {
 		details := make(xerr.ValidationDetails, 0, len(fieldErrors))
 		for _, fieldErr := range fieldErrors {
 			msg := fmt.Sprintf("failed '%s' check", fieldErr.Tag())

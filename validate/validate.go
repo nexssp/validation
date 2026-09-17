@@ -13,8 +13,7 @@ func All(checks ...error) error {
 	var details xerr.ValidationDetails
 	for _, err := range checks {
 		if err != nil {
-			var ve fieldError
-			if errors.As(err, &ve) {
+			if ve, ok := errors.AsType[fieldError](err); ok {
 				details = append(details, xerr.ValidationDetail{
 					Field:      ve.field,
 					Validation: ve.rule,
