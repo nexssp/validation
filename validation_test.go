@@ -6,12 +6,13 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator/v10"
+
 	"github.com/nexssp/validation"
 )
 
 type userDTO struct {
-	Name  string `json:"name" validate:"required,min=3"`
-	Email string `json:"email" validate:"required,email"`
+	Name  string `json:"name"     validate:"required,min=3"`
+	Email string `json:"email"    validate:"required,email"`
 }
 
 func TestStructValidation(t *testing.T) {

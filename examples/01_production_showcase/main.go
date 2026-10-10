@@ -7,25 +7,26 @@ import (
 
 	"github.com/nexssp/kernel/action"
 	"github.com/nexssp/kernel/xerr"
+
 	"github.com/nexssp/validation"
 )
 
 type AddressDTO struct {
-	Street  string `json:"street" validate:"required,min=3"`
-	City    string `json:"city" validate:"required"`
-	Country string `json:"country" validate:"required,len=2"` // ISO-2 country code
+	Street  string `json:"street"   validate:"required,min=3"`
+	City    string `json:"city"     validate:"required"`
+	Country string `json:"country"  validate:"required,len=2"` // ISO-2 country code
 }
 
 type OrderItemDTO struct {
-	SKU      string `json:"sku" validate:"required,alphanum"`
-	Quantity int    `json:"quantity" validate:"required,gt=0"`
+	SKU      string `json:"sku"             validate:"required,alphanum"`
+	Quantity int    `json:"quantity"        validate:"required,gt=0"`
 	PriceUSD int64  `json:"price_usd_cents" validate:"required,gt=0"`
 }
 
 type CheckoutReq struct {
-	CustomerEmail string         `json:"customer_email" validate:"required,email"`
-	Shipping      AddressDTO     `json:"shipping_address" validate:"required"`
-	Items         []OrderItemDTO `json:"items" validate:"required,min=1,dive"`
+	CustomerEmail string         `json:"customer_email"     validate:"required,email"`
+	Shipping      AddressDTO     `json:"shipping_address"   validate:"required"`
+	Items         []OrderItemDTO `json:"items"              validate:"required,min=1,dive"`
 	Notes         string         `json:"notes,omitempty"`
 }
 

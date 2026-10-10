@@ -7,12 +7,13 @@ import (
 
 	"github.com/nexssp/kernel/action"
 	"github.com/nexssp/kernel/xerr"
+
 	"github.com/nexssp/validation"
 )
 
 type orderDTO struct {
-	ID    string `json:"id" validate:"required"`
-	Count int    `json:"count" validate:"gt=0"`
+	ID    string `json:"id"     validate:"required"`
+	Count int    `json:"count"  validate:"gt=0"`
 }
 
 func TestValidateAction(t *testing.T) {
