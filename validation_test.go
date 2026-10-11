@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/nexssp/kernel/xerr"
 
 	"github.com/nexssp/validation"
 )
@@ -112,5 +113,113 @@ func TestRegisterCustomValidation(t *testing.T) {
 
 	if err := validation.Struct(ctx, customTarget{Code: "other"}); err == nil {
 		t.Error("expected custom rule failure, got nil")
+	}
+}
+
+func TestVar_AcceptsValidScalar(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	for _, tc := range []struct {
+		name  string
+		value any
+		rule  string
+	}{
+		{"required non-empty string", "alice", "required"},
+		{"email", "alice@nexss.com", "required,email"},
+		{"oneof hit", "medium", "oneof=low medium high"},
+		{"int gt", 5, "gt=0"},
+		{"empty rule is noop", "", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if err := validation.Var(ctx, tc.value, tc.rule); err != nil {
+				t.Fatalf("Var(%v, %q) = %v, want nil", tc.value, tc.rule, err)
+			}
+		})
+	}
+}
+
+func TestVar_RejectsInvalidScalar(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	for _, tc := range []struct {
+		name    string
+		value   any
+		rule    string
+		wantTag string
+	}{
+		{"empty required", "", "required", "required"},
+		{"bad email", "not-an-email", "required,email", "email"},
+		{"oneof miss", "urgent", "oneof=low medium high", "oneof"},
+		{"int gte", -1, "gte=0", "gte"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			err := validation.Var(ctx, tc.value, tc.rule)
+			if err == nil {
+				t.Fatalf("Var(%v, %q) = nil, want error", tc.value, tc.rule)
+			}
+			if kind := xerr.KindFrom(err); kind != xerr.KindValidation {
+				t.Fatalf("KindFrom = %v, want KindValidation", kind)
+			}
+			appErr, ok := errors.AsType[*xerr.AppError](err)
+			if !ok || len(appErr.ValidationDetails) == 0 {
+				t.Fatalf("missing structured detail: %+v", err)
+			}
+			if got := appErr.ValidationDetails[0].Validation; got != tc.wantTag {
+				t.Errorf("Validation = %q, want %q", got, tc.wantTag)
+			}
+		})
+	}
+}
+
+func TestMap_CollectsPerKeyDetails(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	err := validation.Map(ctx, map[string]any{
+		"email":   "not-an-email",
+		"urgency": "urgent",
+		"count":   5,
+	}, map[string]any{
+		"email":   "required,email",
+		"urgency": "required,oneof=low medium high critical",
+		"count":   "gt=0",
+	})
+	if err == nil {
+		t.Fatal("Map returned nil, want error")
+	}
+
+	appErr, ok := errors.AsType[*xerr.AppError](err)
+	if !ok {
+		t.Fatalf("err type = %T, want *xerr.AppError", err)
+	}
+	if len(appErr.ValidationDetails) != 2 {
+		t.Fatalf("details = %d, want 2", len(appErr.ValidationDetails))
+	}
+
+	byField := map[string]string{}
+	for _, d := range appErr.ValidationDetails {
+		byField[d.Field] = d.Validation
+	}
+	if byField["email"] != "email" {
+		t.Errorf("email tag = %q, want email", byField["email"])
+	}
+	if byField["urgency"] != "oneof" {
+		t.Errorf("urgency tag = %q, want oneof", byField["urgency"])
+	}
+}
+
+func TestMap_NilAndEmptyRulesAreNoop(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	if err := validation.Map(ctx, nil, nil); err != nil {
+		t.Errorf("Map(nil, nil) = %v, want nil", err)
+	}
+	if err := validation.Map(ctx, map[string]any{"x": "y"}, map[string]any{}); err != nil {
+		t.Errorf("Map(_, empty) = %v, want nil", err)
 	}
 }

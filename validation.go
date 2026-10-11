@@ -2,11 +2,13 @@ package validation
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/nexssp/kernel/xerr"
 )
 
 var (
@@ -127,4 +129,62 @@ func trimValue(rv reflect.Value) {
 // after tag validation passes. Implementations must be safe for concurrent use.
 type Validatable interface {
 	Validate() error
+}
+
+// Because Var validates a scalar (not a struct field), the Field
+// component of each returned ValidationDetail is empty. Callers that
+// know the field name (the schema extension does) should overwrite it.
+func Var(ctx context.Context, value any, rule string) error {
+	if rule == "" {
+		return nil
+	}
+	coreMu.RLock()
+	err := core().VarCtx(ctx, value, rule)
+	coreMu.RUnlock()
+	if err != nil {
+		return FromValidatorError(err)
+	}
+	return nil
+}
+
+// Map validates a runtime map against per-key rule strings. Keys
+// missing from rules are ignored. A nil or empty rules map is a no-op.
+//
+// Internally each key is validated with Var so the rules syntax is
+// identical to struct tags. The Field component of each returned
+// ValidationDetail is set to the map key.
+func Map(ctx context.Context, data, rules map[string]any) error {
+	if len(rules) == 0 {
+		return nil
+	}
+
+	var details xerr.ValidationDetails
+	for key, raw := range rules {
+		rule, ok := raw.(string)
+		if !ok || rule == "" {
+			continue
+		}
+		if err := Var(ctx, data[key], rule); err != nil {
+			if appErr, ok := errors.AsType[*xerr.AppError](err); ok && len(appErr.ValidationDetails) > 0 {
+				for _, d := range appErr.ValidationDetails {
+					d.Field = key
+					details = append(details, d)
+				}
+				continue
+			}
+			details = append(details, xerr.ValidationDetail{
+				Field:      key,
+				Validation: "custom",
+				Value:      err.Error(),
+			})
+		}
+	}
+	if len(details) == 0 {
+		return nil
+	}
+	return &xerr.AppError{
+		Kind:              xerr.KindValidation,
+		Message:           "validation failed",
+		ValidationDetails: details,
+	}
 }

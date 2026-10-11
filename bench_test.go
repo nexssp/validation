@@ -262,3 +262,13 @@ func TestAllocBudget_FromValidatorError(t *testing.T) {
 		t.Fatalf("FromValidatorError budget exceeded: %.2f allocs (was ~9)", allocs)
 	}
 }
+
+func TestAllocBudget_Var(t *testing.T) {
+	allocs := testing.AllocsPerRun(1_000, func() {
+		_ = validation.Var(benchCtx, benchValidEmail, "required,email")
+	})
+	// Measured ~7; budget 15 doubles headroom for a 2× regression.
+	if allocs > 15 {
+		t.Fatalf("Var budget exceeded: %.2f allocs (was ~7)", allocs)
+	}
+}
