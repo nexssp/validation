@@ -1,10 +1,10 @@
 module github.com/nexssp/validation
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/go-playground/validator/v10 v10.30.5
-	github.com/nexssp/kernel v0.37.0
+	github.com/nexssp/kernel v0.38.1
 )
 
 require (
