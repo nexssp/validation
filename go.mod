@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/go-playground/validator/v10 v10.30.6
-	github.com/nexssp/kernel v0.39.1
+	github.com/nexssp/kernel v0.40.3
 )
 
 require (
